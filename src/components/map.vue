@@ -79,6 +79,7 @@ export default {
         marker5  = L.marker([storeLocations[4].lat, storeLocations[4].long]).addTo(mymap).on('click', onClick);
         marker5.bindPopup("<b>Colosio</b>");
 
+        var storeCost = [250, 350, 200, 250, 300];
         
         var storageLocations = 
         [
@@ -104,19 +105,33 @@ export default {
 
         almacen5  = L.marker([storageLocations[4].lat, storageLocations[4].long], {icon: user}).addTo(mymap).on('click', onClick);
         almacen5.bindPopup("<b>Almacen 5</b>"); 
-        
-        var distances = []
+
+        var storageCost = [1500, 1350, 2200, 1550, 2000];
+
+        var poblation = [];
+        for(var x = 0; x < 30; x++)
+        {
+            poblation[x] = new Array(5)
+            for(var y = 0; y < 5; y++)
+            {
+                poblation[x][y] = Math.round(Math.random());
+            }
+        }
+
+        var distances = [], distancesCost = [];
         
         for(var i = 0; i < storeLocations.length; i++)
         {
             distances[i] = new Array(storageLocations.length);
+            distancesCost[i] = new Array(storageLocations.length);
             for(var j = 0; j < storageLocations.length; j++ )
             {
                 distances[i][j] = distance(storeLocations[i].lat, storeLocations[i].long, storageLocations[j].lat, storageLocations[j].long, 'K' )
+                distancesCost[i][j] = parseFloat((distances[i][j] * 0.2 * 25).toFixed(1)); 
             }
         }
-        console.log(distances)
-        console.log("KM", distance(storeLocations[0].lat, storeLocations[0].long, storageLocations[0].lat, storageLocations[0].long, 'K' ));
+        console.log(distances, distancesCost, storeCost, storageCost, poblation)
+        // console.log("KM", distance(storeLocations[0].lat, storeLocations[0].long, storageLocations[0].lat, storageLocations[0].long, 'K' ));
 
 
         function distance(lat1, lon1, lat2, lon2, unit) {
