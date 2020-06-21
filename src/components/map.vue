@@ -29,13 +29,13 @@ export default {
     methods: {
         reloadPage(){
             location.reload();
-        }
+        },
     },
 
     mounted() {
         var L = window.L;
         // var that = this;
-        var mymap = L.map('mapid').setView([21.922769, -102.301567], 12);
+        var mymap = L.map('mapid').setView([21.889094, -102.298301], 13);
         L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
             maxZoom: 18,
             attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
@@ -47,10 +47,18 @@ export default {
         }).addTo(mymap);
 
         var user = L.icon({
-            iconUrl: 'https://image.flaticon.com/icons/png/512/1946/1946401.png',
+            iconUrl: 'https://cdn.glitch.com/ab6ba3e3-64bd-4c28-b7e1-9fa92931b067%2Ficons8-warehouse-100.png?v=1592498893779',
             iconSize:     [35, 38], // size of the icon
             iconAnchor:   [18, 10], // point of the icon which will correspond to marker's location
         });
+
+        var cooffe = L.icon({
+            iconUrl: 'https://cdn.glitch.com/ab6ba3e3-64bd-4c28-b7e1-9fa92931b067%2Flogo.png?v=1592498333294',
+            iconSize:     [45, 48], // size of the icon
+            iconAnchor:   [23, 10], // point of the icon which will correspond to marker's location
+        });
+
+        var distances = [], distancesCost = [], poblation = [], connections = [] ;
 
         var storeLocations = 
         [
@@ -59,27 +67,13 @@ export default {
             {lat: 21.916714, long: -102.312813},
             {lat: 21.924602, long: -102.318030},
             {lat: 21.924425, long: -102.306345},
+            {lat: 21.839207, long: -102.289491},
+            {lat: 21.874790, long: -102.303409},
+            {lat: 21.880527, long: -102.261486}
         ]
 
-        var marker, marker2, marker3, marker4, marker5; 
-        var geocodeService = L.esri.Geocoding.geocodeService();
-
-        marker  = L.marker([storeLocations[0].lat, storeLocations[0].long]).addTo(mymap).on('click', onClick);
-        marker.bindPopup("<b>Plaza San Telmo</b>");
-        
-        marker2  = L.marker([storeLocations[1].lat, storeLocations[1].long]).addTo(mymap).on('click', onClick);
-        marker2.bindPopup("<b>Centro Comercial Altaria</b>");
-
-        marker3  = L.marker([storeLocations[2].lat, storeLocations[2].long]).addTo(mymap).on('click', onClick);
-        marker3.bindPopup("<b>Sierra Morena</b>");
-
-        marker4  = L.marker([storeLocations[3].lat, storeLocations[3].long]).addTo(mymap).on('click', onClick);
-        marker4.bindPopup("<b>Campestre</b>");
-
-        marker5  = L.marker([storeLocations[4].lat, storeLocations[4].long]).addTo(mymap).on('click', onClick);
-        marker5.bindPopup("<b>Colosio</b>");
-
-        var storeCost = [250, 350, 200, 250, 300];
+        var storeCost = [19250, 28500, 20000, 23250, 20000, 21750, 16400, 24800];
+        var storeProfits = [38500, 57000, 40000, 46500, 40000, 43000, 32800, 48000]
         
         var storageLocations = 
         [
@@ -89,6 +83,36 @@ export default {
             {lat: randomLat(), long: randomLong()},
             {lat: randomLat(), long: randomLong()},
         ]
+        var storageCost = [30000, 38350, 22200, 41550, 26000];
+        var Cij = 0, Fij = 0, min1 = 0, max1 = 0, min2 = 0, max2 = 0;
+
+        var marker, marker2, marker3, marker4, marker5, marker6, marker7, marker8; 
+        var geocodeService = L.esri.Geocoding.geocodeService();
+        marker  = L.marker([storeLocations[0].lat, storeLocations[0].long], {icon: cooffe}).addTo(mymap).on('click', onClick);
+        marker.bindPopup("<b>Plaza San Telmo</b>");
+        
+        marker2  = L.marker([storeLocations[1].lat, storeLocations[1].long], {icon: cooffe}).addTo(mymap).on('click', onClick);
+        marker2.bindPopup("<b>Centro Comercial Altaria</b>");
+
+        marker3  = L.marker([storeLocations[2].lat, storeLocations[2].long], {icon: cooffe}).addTo(mymap).on('click', onClick);
+        marker3.bindPopup("<b>Sierra Morena</b>");
+
+        marker4  = L.marker([storeLocations[3].lat, storeLocations[3].long], {icon: cooffe}).addTo(mymap).on('click', onClick);
+        marker4.bindPopup("<b>Campestre</b>");
+
+        marker5  = L.marker([storeLocations[4].lat, storeLocations[4].long], {icon: cooffe}).addTo(mymap).on('click', onClick);
+        marker5.bindPopup("<b>Colosio</b>");
+
+        marker6  = L.marker([storeLocations[5].lat, storeLocations[5].long], {icon: cooffe}).addTo(mymap).on('click', onClick);
+        marker6.bindPopup("<b>Plaza Vestir</b>");
+
+        marker7  = L.marker([storeLocations[6].lat, storeLocations[6].long], {icon: cooffe}).addTo(mymap).on('click', onClick);
+        marker7.bindPopup("<b>Hotel One</b>");
+
+        marker8  = L.marker([storeLocations[7].lat, storeLocations[7].long], {icon: cooffe}).addTo(mymap).on('click', onClick);
+        marker8.bindPopup("<b>Plaza Espacio</b>");
+
+        
         
         var almacen1, almacen2, almacen3, almacen4, almacen5;
         almacen1  = L.marker([storageLocations[0].lat, storageLocations[0].long], {icon: user}).addTo(mymap).on('click', onClick);
@@ -106,32 +130,192 @@ export default {
         almacen5  = L.marker([storageLocations[4].lat, storageLocations[4].long], {icon: user}).addTo(mymap).on('click', onClick);
         almacen5.bindPopup("<b>Almacen 5</b>"); 
 
-        var storageCost = [1500, 1350, 2200, 1550, 2000];
+       
 
-        var poblation = [];
-        for(var x = 0; x < 30; x++)
+        main();
+
+        function main()
         {
-            poblation[x] = new Array(5)
-            for(var y = 0; y < 5; y++)
-            {
-                poblation[x][y] = Math.round(Math.random());
-            }
+            poblationGenerator();
+            genetic();
+            // getBetter()
         }
-
-        var distances = [], distancesCost = [];
         
-        for(var i = 0; i < storeLocations.length; i++)
+
+         function poblationGenerator()
         {
-            distances[i] = new Array(storageLocations.length);
-            distancesCost[i] = new Array(storageLocations.length);
-            for(var j = 0; j < storageLocations.length; j++ )
+            //Poblation Generator
+            for(var x = 0; x < 30; x++)
             {
-                distances[i][j] = distance(storeLocations[i].lat, storeLocations[i].long, storageLocations[j].lat, storageLocations[j].long, 'K' )
-                distancesCost[i][j] = parseFloat((distances[i][j] * 0.2 * 25).toFixed(1)); 
+                poblation[x] = new Array(5)
+                for(var y = 0; y < 5; y++)
+                {
+                    poblation[x][y] = Math.round(Math.random());
+                }
+            }
+            console.log(poblation);
+        }
+
+
+        //Method to get connections of closest available storage for every store
+        
+        function genetic()
+        {
+            for(var generaciones = 0; generaciones < 150; generaciones ++)
+            {
+                console.log("Generation: ", generaciones)
+                var selectedIndex1 = 0, selectedIndex2 = 0, son = [];     
+                for(var g = 0; g < 20; g++)
+                {
+                    selectedIndex1 = Math.floor(Math.random() * 30);
+                    selectedIndex2 = Math.floor(Math.random() * 30);
+                    // console.log(g, selectedIndex1, selectedIndex2)
+                    // console.log("Cromosoma 1:", poblation[selectedIndex1]);
+                    getDistances(poblation[selectedIndex1]);
+                    getConnections(poblation[selectedIndex1]);
+                    getZ1_1(poblation[selectedIndex1]);
+                    getZ2_1();
+                    // console.log("Cromosoma 2:", poblation[selectedIndex2]);
+                    distances = []; distancesCost = [], connections = [];
+                    //Cruce
+                    if(Math.floor(Math.random() * 100) + 1 <= 80)
+                    {
+                        // console.log("CRUCE");
+                        son = poblation[selectedIndex1].slice(0, 3).concat(poblation[selectedIndex2].slice(3, 5));
+                        //Mutación bit por bit
+                        for(var m = 0; m < poblation[selectedIndex1].length; m++)
+                        {
+                            if(Math.floor(Math.random() * 100) + 1 <= 5)
+                            {
+                                // console.log("MUTACION")
+                                if(son[m] == 0) son[m] = 1; 
+                                else son[m] = 0;
+                            }
+                        }
+                        // console.log("Son", son);
+                        getDistances(son);
+                        getConnections(son);
+                        getZ1_2(son);
+                        getZ2_2();
+                        if(min2 < min1 && max2 > max1)
+                        {
+                            console.log("CAMBIO DE CROMOSOMA");
+                            poblation[selectedIndex1] = son;
+                        }
+                    }
+                    
+                }
             }
         }
-        console.log(distances, distancesCost, storeCost, storageCost, poblation)
-        // console.log("KM", distance(storeLocations[0].lat, storeLocations[0].long, storageLocations[0].lat, storageLocations[0].long, 'K' ));
+        
+        // function getBetter()
+        // {
+
+        // }
+
+
+        function getDistances(crom) {
+            //Get distances between available storage and every store, also gets Distance cost    
+            for(var i = 0; i < storeLocations.length; i++)
+            {
+                distances[i] = new Array(storageLocations.length);
+                distancesCost[i] = new Array(storageLocations.length);
+                for(var j = 0; j < storageLocations.length; j++ )
+                {
+                    if(crom[j] == 1)
+                    {
+                        distances[i][j] = distance(storeLocations[i].lat, storeLocations[i].long, storageLocations[j].lat, storageLocations[j].long, 'K' )
+                        distancesCost[i][j] = parseFloat((distances[i][j] * 0.8 * 55).toFixed(1));
+                    }
+                    else 
+                    {
+                        distances[i][j] = 1000
+                        distancesCost[i][j] = 1000
+                    }
+                }
+            }
+        }
+       
+        function getConnections(crom)
+        {
+            
+            for(var i = 0; i < storeLocations.length; i++)
+            {
+                connections[i] = new Array(storageLocations.length);
+                for(var j = 0; j < storageLocations.length; j++ )
+                {
+                    connections[i][j] = 0
+                }
+                if(crom[distances[i].indexOf(Math.min(...distances[i]))] == 1)
+                    connections[i][distances[i].indexOf(Math.min(...distances[i]))] = 1;
+                // console.log("Connections", i, distances[i].indexOf(Math.min(...distances[i])));
+            }
+            // console.log("Connections Array", connections)
+        }
+
+
+        //Get minimize param
+        function getZ1_1(crom)
+        {
+            Cij = 0; Fij = 0; min1 = 0;
+            for(var i = 0; i < storeLocations.length; i++)
+            {
+                for(var j = 0; j < storageLocations.length; j++ )
+                {
+                    Cij+= (distancesCost[i][j]+storeCost[i])*connections[i][j];
+                }
+            }
+            for(var x = 0; x < storageLocations.length; x++)
+            {
+                Fij += storageCost[x]*crom[x];
+            }
+            min1 = Cij + Fij;
+            // console.log("Z1_1:", min1.toFixed(0));
+        }
+
+        function getZ2_1()
+        {
+            max1 = 0;
+            for(var i = 0; i < storeLocations.length; i++)
+            {
+                for(var j = 0; j < storageLocations.length; j++ )
+                {
+                    max1 += (storeProfits[i] - distancesCost[i][j])*connections[i][j];
+                }
+            }
+            // console.log("Z2_1:", max1.toFixed(0));
+        }
+
+        function getZ1_2(crom)
+        {
+            Cij = 0; Fij = 0; min2 = 0;
+            for(var i = 0; i < storeLocations.length; i++)
+            {
+                for(var j = 0; j < storageLocations.length; j++ )
+                {
+                    Cij+= (distancesCost[i][j]+storeCost[i])*connections[i][j];
+                }
+            }
+            for(var x = 0; x < storageLocations.length; x++)
+            {
+                Fij += storageCost[x]*crom[x];
+            }
+            min2 = Cij + Fij;
+            // console.log("Z1_2:", min2.toFixed(0));
+        }
+
+        function getZ2_2()
+        {
+            max2 = 0;
+            for(var i = 0; i < storeLocations.length; i++)
+            {
+                for(var j = 0; j < storageLocations.length; j++ )
+                {
+                    max2 += (storeProfits[i] - distancesCost[i][j])*connections[i][j];
+                }
+            }
+            // console.log("Z2_2:", max2.toFixed(0));
+        }
 
 
         function distance(lat1, lon1, lat2, lon2, unit) {
@@ -174,7 +358,8 @@ export default {
             if (error) {
                 return;
             }
-            console.log(result.address)
+            error = result;
+            // console.log(result.address)
             // that.address = result.address.LongLabel;
             // that.clicked = true;
             // console.log(that.address);
