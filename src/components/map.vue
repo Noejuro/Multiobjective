@@ -138,7 +138,8 @@ export default {
         {
             poblationGenerator();
             genetic();
-            // getBetter()
+            var best = getBetter();
+            console.log(best);
         }
         
 
@@ -208,10 +209,31 @@ export default {
             }
         }
         
-        // function getBetter()
-        // {
-
-        // }
+        function getBetter()
+        {
+            var bestZ1 = 0; var bestZ2 = 0; var bestOption = [];
+            min1 = 0; max1 = 0;
+            getDistances(poblation[0]);
+            getConnections(poblation[0]);
+            getZ1_1(poblation[0]);
+            getZ2_1();
+            bestZ1 = min1; bestZ2 = max1;
+            bestOption = poblation[0];
+            for(var b = 1; b < poblation.length; b++)
+            {
+                getDistances(poblation[b]);
+                getConnections(poblation[b]);
+                getZ1_1(poblation[b]);
+                getZ2_1();
+                if(min1 < bestZ1 && max1 > bestZ2)
+                {
+                    console.log("MEJOR")
+                    bestZ1 = min1; bestZ2 = max1;
+                    bestOption = poblation[b];
+                }
+            }
+            return bestOption;
+        }
 
 
         function getDistances(crom) {
