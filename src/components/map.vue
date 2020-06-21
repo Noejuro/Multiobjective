@@ -5,11 +5,23 @@
                 <v-row justify="center" align="center" >
                     <v-img src="@/assets/resources/logo.png" max-width="100px"></v-img>
                 </v-row>
-                <v-row class="Bold pl-1">
-                    Localidades
-                </v-row>
                 <v-row class="Bold">
                     <v-btn @click="reloadPage" style="font-size: 9px" width="100%">Generar nuevos almacenes</v-btn>
+                </v-row>
+                <v-row class="Light pl-1 pt-8">
+                    Gasto minimizado:
+                </v-row>
+                <v-row class="Bold pl-1" style="font-size: 14px">
+                    {{min}}
+                </v-row>
+                <v-row class="Light pl-1">
+                    Ganancia maximizada:
+                </v-row>
+                <v-row class="Bold pl-1" style="font-size: 14px">
+                    {{max}}
+                </v-row>
+                <v-row class="Bold pt-8">
+                    <v-btn @click="start" :disabled="disabled" style="font-size: 9px" width="100%">Iniciar</v-btn>
                 </v-row>
             </v-col>
             <v-col class="pa-0" style="height: 100%" >
@@ -26,17 +38,25 @@
 <script>
 export default {
 
-    methods: {
-        reloadPage(){
-            location.reload();
-        },
+    data() {
+        return {
+            min: 0,
+            max: 0,
+            inicio: false,
+            L: null,
+            mymap: null,
+            storeLocations: null,
+            storageLocations: null,
+            almacen1: null, almacen2: null, almacen3: null, almacen4: null, almacen5: null, 
+            disabled: false,
+        }
     },
 
     mounted() {
-        var L = window.L;
-        // var that = this;
-        var mymap = L.map('mapid').setView([21.889094, -102.298301], 13);
-        L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+        var that = this;
+        that.L = window.L;
+        that.mymap = that.L.map('mapid').setView([21.889094, -102.298301], 13);
+        that.L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
             maxZoom: 18,
             attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
                 '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
@@ -44,21 +64,19 @@ export default {
             id: 'mapbox/streets-v11',
             tileSize: 512,
             zoomOffset: -1
-        }).addTo(mymap);
+        }).addTo(that.mymap);
 
-        var user = L.icon({
-            iconUrl: 'https://cdn.glitch.com/ab6ba3e3-64bd-4c28-b7e1-9fa92931b067%2Ficons8-warehouse-100.png?v=1592498893779',
-            iconSize:     [35, 38], // size of the icon
-            iconAnchor:   [18, 10], // point of the icon which will correspond to marker's location
-        });
-
-        var cooffe = L.icon({
+        var cooffe = that.L.icon({
             iconUrl: 'https://cdn.glitch.com/ab6ba3e3-64bd-4c28-b7e1-9fa92931b067%2Flogo.png?v=1592498333294',
             iconSize:     [45, 48], // size of the icon
             iconAnchor:   [23, 10], // point of the icon which will correspond to marker's location
         });
 
-        var distances = [], distancesCost = [], poblation = [], connections = [] ;
+        var user = that.L.icon({
+                iconUrl: 'https://cdn.glitch.com/ab6ba3e3-64bd-4c28-b7e1-9fa92931b067%2Ficons8-warehouse-100.png?v=1592498893779',
+                iconSize:     [35, 38], // size of the icon
+                iconAnchor:   [18, 10], // point of the icon which will correspond to marker's location
+            });
 
         var storeLocations = 
         [
@@ -71,10 +89,34 @@ export default {
             {lat: 21.874790, long: -102.303409},
             {lat: 21.880527, long: -102.261486}
         ]
-
-        var storeCost = [19250, 28500, 20000, 23250, 20000, 21750, 16400, 24800];
-        var storeProfits = [38500, 57000, 40000, 46500, 40000, 43000, 32800, 48000]
+        that.storeLocations = storeLocations;
+        var marker, marker2, marker3, marker4, marker5, marker6, marker7, marker8; 
+        var geocodeService = that.L.esri.Geocoding.geocodeService();
+        marker  = that.L.marker([storeLocations[0].lat, storeLocations[0].long], {icon: cooffe}).addTo(that.mymap).on('click', onClick);
+        marker.bindPopup("<b>Plaza San Telmo</b>");
         
+        marker2  = that.L.marker([storeLocations[1].lat, storeLocations[1].long], {icon: cooffe}).addTo(that.mymap).on('click', onClick);
+        marker2.bindPopup("<b>Centro Comercial Altaria</b>");
+
+        marker3  = that.L.marker([storeLocations[2].lat, storeLocations[2].long], {icon: cooffe}).addTo(that.mymap).on('click', onClick);
+        marker3.bindPopup("<b>Sierra Morena</b>");
+
+        marker4  = that.L.marker([storeLocations[3].lat, storeLocations[3].long], {icon: cooffe}).addTo(that.mymap).on('click', onClick);
+        marker4.bindPopup("<b>Campestre</b>");
+
+        marker5  = that.L.marker([storeLocations[4].lat, storeLocations[4].long], {icon: cooffe}).addTo(that.mymap).on('click', onClick);
+        marker5.bindPopup("<b>Colosio</b>");
+
+        marker6  = that.L.marker([storeLocations[5].lat, storeLocations[5].long], {icon: cooffe}).addTo(that.mymap).on('click', onClick);
+        marker6.bindPopup("<b>Plaza Vestir</b>");
+
+        marker7  = that.L.marker([storeLocations[6].lat, storeLocations[6].long], {icon: cooffe}).addTo(that.mymap).on('click', onClick);
+        marker7.bindPopup("<b>Hotel One</b>");
+
+        marker8  = that.L.marker([storeLocations[7].lat, storeLocations[7].long], {icon: cooffe}).addTo(that.mymap).on('click', onClick);
+        marker8.bindPopup("<b>Plaza Espacio</b>");
+
+
         var storageLocations = 
         [
             {lat: randomLat(), long: randomLong()},
@@ -83,63 +125,101 @@ export default {
             {lat: randomLat(), long: randomLong()},
             {lat: randomLat(), long: randomLong()},
         ]
-        var storageCost = [30000, 38350, 22200, 41550, 26000];
-        var Cij = 0, Fij = 0, min1 = 0, max1 = 0, min2 = 0, max2 = 0;
 
-        var marker, marker2, marker3, marker4, marker5, marker6, marker7, marker8; 
-        var geocodeService = L.esri.Geocoding.geocodeService();
-        marker  = L.marker([storeLocations[0].lat, storeLocations[0].long], {icon: cooffe}).addTo(mymap).on('click', onClick);
-        marker.bindPopup("<b>Plaza San Telmo</b>");
-        
-        marker2  = L.marker([storeLocations[1].lat, storeLocations[1].long], {icon: cooffe}).addTo(mymap).on('click', onClick);
-        marker2.bindPopup("<b>Centro Comercial Altaria</b>");
+        that.storageLocations = storageLocations;
 
-        marker3  = L.marker([storeLocations[2].lat, storeLocations[2].long], {icon: cooffe}).addTo(mymap).on('click', onClick);
-        marker3.bindPopup("<b>Sierra Morena</b>");
-
-        marker4  = L.marker([storeLocations[3].lat, storeLocations[3].long], {icon: cooffe}).addTo(mymap).on('click', onClick);
-        marker4.bindPopup("<b>Campestre</b>");
-
-        marker5  = L.marker([storeLocations[4].lat, storeLocations[4].long], {icon: cooffe}).addTo(mymap).on('click', onClick);
-        marker5.bindPopup("<b>Colosio</b>");
-
-        marker6  = L.marker([storeLocations[5].lat, storeLocations[5].long], {icon: cooffe}).addTo(mymap).on('click', onClick);
-        marker6.bindPopup("<b>Plaza Vestir</b>");
-
-        marker7  = L.marker([storeLocations[6].lat, storeLocations[6].long], {icon: cooffe}).addTo(mymap).on('click', onClick);
-        marker7.bindPopup("<b>Hotel One</b>");
-
-        marker8  = L.marker([storeLocations[7].lat, storeLocations[7].long], {icon: cooffe}).addTo(mymap).on('click', onClick);
-        marker8.bindPopup("<b>Plaza Espacio</b>");
-
-        
-        
         var almacen1, almacen2, almacen3, almacen4, almacen5;
-        almacen1  = L.marker([storageLocations[0].lat, storageLocations[0].long], {icon: user}).addTo(mymap).on('click', onClick);
+        almacen1  = that.L.marker([storageLocations[0].lat, storageLocations[0].long], {icon: user}).addTo(that.mymap).on('click', onClick);
         almacen1.bindPopup("<b>Almacen 1</b>");
 
-        almacen2  = L.marker([storageLocations[1].lat, storageLocations[1].long], {icon: user}).addTo(mymap).on('click', onClick);
+        almacen2  = that.L.marker([storageLocations[1].lat, storageLocations[1].long], {icon: user}).addTo(that.mymap).on('click', onClick);
         almacen2.bindPopup("<b>Almacen 2</b>");
 
-        almacen3  = L.marker([storageLocations[2].lat, storageLocations[2].long], {icon: user}).addTo(mymap).on('click', onClick);
+        almacen3  = that.L.marker([storageLocations[2].lat, storageLocations[2].long], {icon: user}).addTo(that.mymap).on('click', onClick);
         almacen3.bindPopup("<b>Almacen 3</b>");
 
-        almacen4  = L.marker([storageLocations[3].lat, storageLocations[3].long], {icon: user}).addTo(mymap).on('click', onClick);
+        almacen4  = that.L.marker([storageLocations[3].lat, storageLocations[3].long], {icon: user}).addTo(that.mymap).on('click', onClick);
         almacen4.bindPopup("<b>Almacen 4</b>");
 
-        almacen5  = L.marker([storageLocations[4].lat, storageLocations[4].long], {icon: user}).addTo(mymap).on('click', onClick);
+        almacen5  = that.L.marker([storageLocations[4].lat, storageLocations[4].long], {icon: user}).addTo(that.mymap).on('click', onClick);
         almacen5.bindPopup("<b>Almacen 5</b>"); 
 
-       
+        that.almacen1 = almacen1; that.almacen2 = almacen2; that.almacen3 = almacen3; that.almacen4 = almacen4; that.almacen5 = almacen5;
 
+        function randomLat() {
+            var lat = 0;
+            lat = Math.random() * (21.952586 - 21.849286) + 21.849286;
+            return lat;
+        }
+
+        function randomLong() {
+            var lat = 0;
+            lat = (Math.random() * (102.347645 - 102.260167) + 102.260167) * -1;
+            return lat;
+        }
+
+        function onClick(e) {
+            console.log(e);
+            geocodeService.reverse().latlng(this.getLatLng()).run(function (error, result) {
+            if (error) {
+                return;
+            }
+            error = result;
+            // console.log(result.address)
+            // that.address = result.address.LongLabel;
+            // that.clicked = true;
+            // console.log(that.address);
+            });
+            }        
+    },
+
+    methods: {
+        reloadPage(){
+            location.reload();
+        },
+        start() {
+            this.disabled = true;
+            var that = this;
+            var mymap = that.mymap;
+
+            var storeLocations = that.storeLocations;
+
+            var distances = [], distancesCost = [], poblation = [], connections = [] ;  
+
+            var storeCost = [19250, 28500, 20000, 23250, 20000, 21750, 16400, 24800];
+            var storeProfits = [38500, 57000, 40000, 46500, 40000, 43000, 32800, 48000]
+            
+            var storageLocations = that.storageLocations;
+            
+            var storageCost = [30000, 38350, 22200, 41550, 26000];
+            var Cij = 0, Fij = 0, min1 = 0, max1 = 0, min2 = 0, max2 = 0;
+
+        
+
+       
         main();
 
         function main()
         {
+            // mymap.addLayer(that.almacen1)
+            // mymap.addLayer(that.almacen2)
+            // mymap.addLayer(that.almacen3)
+            // mymap.addLayer(that.almacen4)
+            // mymap.addLayer(that.almacen5)
             poblationGenerator();
             genetic();
             var best = getBetter();
             console.log(best);
+            if(best[0] == 0)
+                mymap.removeLayer(that.almacen1)
+            if(best[1] == 0)
+                mymap.removeLayer(that.almacen2)
+            if(best[2] == 0)
+                mymap.removeLayer(that.almacen3)
+            if(best[3] == 0)
+                mymap.removeLayer(that.almacen4)
+            if(best[4] == 0)
+                mymap.removeLayer(that.almacen5)
         }
         
 
@@ -153,8 +233,7 @@ export default {
                 {
                     poblation[x][y] = Math.round(Math.random());
                 }
-            }
-            console.log(poblation);
+            }            
         }
 
 
@@ -164,7 +243,7 @@ export default {
         {
             for(var generaciones = 0; generaciones < 150; generaciones ++)
             {
-                console.log("Generation: ", generaciones)
+                // console.log("Generation: ", generaciones)
                 var selectedIndex1 = 0, selectedIndex2 = 0, son = [];     
                 for(var g = 0; g < 20; g++)
                 {
@@ -200,7 +279,7 @@ export default {
                         getZ2_2();
                         if(min2 < min1 && max2 > max1)
                         {
-                            console.log("CAMBIO DE CROMOSOMA");
+                            // console.log("CAMBIO DE CROMOSOMA");
                             poblation[selectedIndex1] = son;
                         }
                     }
@@ -212,23 +291,34 @@ export default {
         function getBetter()
         {
             var bestZ1 = 0; var bestZ2 = 0; var bestOption = [];
-            min1 = 0; max1 = 0;
+            min1 = 0; max1 = 0; min2 = 0; max2 = 0;
+
+            const formatter = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 1
+            })
+
             getDistances(poblation[0]);
             getConnections(poblation[0]);
             getZ1_1(poblation[0]);
             getZ2_1();
             bestZ1 = min1; bestZ2 = max1;
+            console.log(min1, max1)
             bestOption = poblation[0];
+            that.min = formatter.format(min1.toFixed(0)); that.max = formatter.format(max1.toFixed(0));
             for(var b = 1; b < poblation.length; b++)
             {
                 getDistances(poblation[b]);
                 getConnections(poblation[b]);
-                getZ1_1(poblation[b]);
-                getZ2_1();
-                if(min1 < bestZ1 && max1 > bestZ2)
+                getZ1_2(poblation[b]);
+                getZ2_2();
+                if(min2 < bestZ1 && max2 > bestZ2)
                 {
                     console.log("MEJOR")
-                    bestZ1 = min1; bestZ2 = max1;
+                    console.log(min2, max2)
+                    bestZ1 = min2; bestZ2 = max2;
+                    that.min = formatter.format(min2.toFixed(0)); that.max = formatter.format(max2.toFixed(0));
                     bestOption = poblation[b];
                 }
             }
@@ -361,32 +451,7 @@ export default {
                 return parseFloat(dist.toFixed(2));
             }
         }
-
-        function randomLat() {
-            var lat = 0;
-            lat = Math.random() * (21.952586 - 21.849286) + 21.849286;
-            return lat;
-        }
-
-        function randomLong() {
-            var lat = 0;
-            lat = (Math.random() * (102.347645 - 102.260167) + 102.260167) * -1;
-            return lat;
-        }
-
-        function onClick(e) {
-            console.log(e);
-            geocodeService.reverse().latlng(this.getLatLng()).run(function (error, result) {
-            if (error) {
-                return;
-            }
-            error = result;
-            // console.log(result.address)
-            // that.address = result.address.LongLabel;
-            // that.clicked = true;
-            // console.log(that.address);
-            });
-        }
+    },
 
     }
 
