@@ -1,27 +1,30 @@
 <template>
     <v-col align="center" style="height: 100%;"  md="12" lg="12" xl="12" cols="12" class="py-0 my-0">
         <v-row justify="center" style="height: 100vh;">
-            <v-col cols="2" class="pt-0" style="height: 100%; background-color: #1F1F1F; color: #F9F9F9; ">
+            <v-col class="pt-0" style="height: 100%; background-color: #1F1F1F; color: #F9F9F9; max-width: 230px;">
                 <v-row justify="center" align="center" >
                     <v-img src="@/assets/resources/logo.png" max-width="100px"></v-img>
                 </v-row>
                 <v-row class="Bold">
-                    <v-btn @click="reloadPage" style="font-size: 9px" width="100%">Generar nuevos almacenes</v-btn>
+                    <v-btn @click="reloadPage" style="font-size: 10px" tile width="100%">Generar nuevos almacenes</v-btn>
                 </v-row>
                 <v-row class="Light pl-1 pt-8">
                     Gasto minimizado:
                 </v-row>
-                <v-row class="Bold pl-1" style="font-size: 14px">
+                <v-row class="Bold pl-3" style="font-size: 14px">
                     {{min}}
                 </v-row>
                 <v-row class="Light pl-1">
                     Ganancia maximizada:
                 </v-row>
-                <v-row class="Bold pl-1" style="font-size: 14px">
+                <v-row class="Bold pl-3" style="font-size: 14px">
                     {{max}}
                 </v-row>
                 <v-row class="Bold pt-8">
-                    <v-btn @click="start" :disabled="disabled" style="font-size: 9px" width="100%">Iniciar</v-btn>
+                    <v-btn @click="start" :disabled="disabled" tile style="font-size: 12px" width="100%">Iniciar</v-btn>
+                </v-row>
+                <v-row class="Light pl-1 pt-8" justify="start" style="text-align: start">
+                    Puedes dar click en cada marcador para observar el nombre de la tienda o el numeo del almacen.
                 </v-row>
             </v-col>
             <v-col class="pa-0" style="height: 100%" >
@@ -29,6 +32,15 @@
             </v-col>
             
         </v-row>
+
+        <v-snackbar v-model="snackbar"  color="success" top timeout="6000">
+            <v-row justify="center">
+                Esta es la opción obtenida del AG
+            </v-row>
+            <v-row justify="center" style="font-size: 13px" >
+                Si deseas una nueva solución presiona en el boton de nuevos almacenes
+            </v-row>
+        </v-snackbar>
 
         
 
@@ -49,6 +61,7 @@ export default {
             storageLocations: null,
             almacen1: null, almacen2: null, almacen3: null, almacen4: null, almacen5: null, 
             disabled: false,
+            snackbar: false,
         }
     },
 
@@ -178,6 +191,7 @@ export default {
             location.reload();
         },
         start() {
+            this.snackbar = true;
             this.disabled = true;
             var that = this;
             var mymap = that.mymap;
